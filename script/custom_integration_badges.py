@@ -1,11 +1,13 @@
 import aiohttp
 import asyncio
+from datetime import date
 import json
 import os
 from typing import Any
 
 DATA_URL = "https://analytics.home-assistant.io/custom_integrations.json"
 PROCESSED_PATH = "docs/badges/"
+RAW_PATH = "docs/raw/custom_integrations/"
 
 
 async def async_get_data(session: aiohttp.ClientSession | None = None):
@@ -19,6 +21,14 @@ async def async_get_data(session: aiohttp.ClientSession | None = None):
         json_body = await r.json()
 
     _session.close()
+
+    # Save the raw data
+    if not os.path.exists(RAW_PATH):
+        os.makedirs(RAW_PATH)
+    today = date.today()
+    path = RAW_PATH + today.isoformat() + ".json"
+    with open(f"{path}/total.json", "w") as file:
+        json.dump(json_body, file)
 
     return json_body
 
