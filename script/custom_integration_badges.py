@@ -27,7 +27,7 @@ async def async_get_data(session: aiohttp.ClientSession | None = None):
         os.makedirs(RAW_PATH)
     today = date.today()
     path = RAW_PATH + today.isoformat() + ".json"
-    with open(f"{path}/total.json", "w") as file:
+    with open(path, "w") as file:
         json.dump(json_body, file)
 
     return json_body
