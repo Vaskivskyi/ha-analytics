@@ -20,7 +20,7 @@ async def async_get_data(session: aiohttp.ClientSession | None = None):
     ) as r:
         json_body = await r.json()
 
-    _session.close()
+    await _session.close()
 
     # Save the raw data
     if not os.path.exists(RAW_PATH):
