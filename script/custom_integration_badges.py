@@ -36,18 +36,33 @@ async def async_get_data(session: aiohttp.ClientSession | None = None):
     today = date.today()
     path = RAW_PATH + today.isoformat() + ".json"
     
-    # Check if this is a new file
+    # Check if this is a new file and if content changed
     is_new_file = not os.path.exists(path)
+    content_changed = True
     
-    with open(path, "w") as file:
-        json.dump(json_body, file)
+    if not is_new_file:
+        # Read existing content and compare
+        try:
+            with open(path, "r") as file:
+                existing_data = json.load(file)
+                content_changed = existing_data != json_body
+        except (json.JSONDecodeError, IOError):
+            # If we can't read the existing file, assume content changed
+            content_changed = True
     
-    if is_new_file:
-        file_changes["added"].append(path)
-        print(f"Added new raw data file: {path}")
+    # Only write and track if content changed or file is new
+    if is_new_file or content_changed:
+        with open(path, "w") as file:
+            json.dump(json_body, file)
+        
+        if is_new_file:
+            file_changes["added"].append(path)
+            print(f"Added new raw data file: {path}")
+        else:
+            file_changes["modified"].append(path)
+            print(f"Updated raw data file: {path}")
     else:
-        file_changes["modified"].append(path)
-        print(f"Updated raw data file: {path}")
+        print(f"No changes needed for raw data file: {path}")
 
     return json_body
 
@@ -85,18 +100,33 @@ def cleanup_old_version_files(integration_path: str, current_versions: list[str]
 
 
 def write_badge_file(file_path: str, badge_data: dict[str, Any]):
-    """Write badge file and track changes"""
+    """Write badge file and track changes only if content actually changed"""
     is_new_file = not os.path.exists(file_path)
+    content_changed = True
     
-    with open(file_path, "w") as file:
-        json.dump(badge_data, file)
+    if not is_new_file:
+        # Read existing content and compare
+        try:
+            with open(file_path, "r") as file:
+                existing_data = json.load(file)
+                content_changed = existing_data != badge_data
+        except (json.JSONDecodeError, IOError):
+            # If we can't read the existing file, assume content changed
+            content_changed = True
     
-    if is_new_file:
-        file_changes["added"].append(file_path)
-        print(f"Created new badge file: {file_path}")
+    # Only write if content changed or file is new
+    if is_new_file or content_changed:
+        with open(file_path, "w") as file:
+            json.dump(badge_data, file)
+        
+        if is_new_file:
+            file_changes["added"].append(file_path)
+            print(f"Created new badge file: {file_path}")
+        else:
+            file_changes["modified"].append(file_path)
+            print(f"Updated badge file: {file_path}")
     else:
-        file_changes["modified"].append(file_path)
-        print(f"Updated badge file: {file_path}")
+        print(f"No changes needed for: {file_path}")
 
 
 async def async_test():

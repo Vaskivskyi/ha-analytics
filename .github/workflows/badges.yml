@@ -67,8 +67,8 @@ jobs:
       uses: peter-evans/create-pull-request@v7
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        author: "ha-analytics-bot <ha-analytics-bot@users.noreply.github.com>"
-        committer: "ha-analytics-bot <ha-analytics-bot@users.noreply.github.com>"
+        author: "asusrouter-bot <asusrouter-bot@users.noreply.github.com>"
+        committer: "asusrouter-bot <asusrouter-bot@users.noreply.github.com>"
         title: "🤖 Update badges"
         branch: "update-badges"
         base: main
