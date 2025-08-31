@@ -36,9 +36,8 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       (github.event_name == 'pull_request' && github.head_ref == 'update-badges') ||
-      (github.event_name == 'pull_request_target' && 
-       github.head_ref == 'update-badges' &&
-       contains(fromJson('["github-actions[bot]", "dependabot[bot]", "copilot-swe-agent[bot]", "asusrouter-bot"]'), github.actor))
+       contains(fromJson('["github-actions[bot]", "dependabot[bot]", "copilot-swe-agent[bot]", "asusrouter-bot"]'), github.actor) &&
+       github.event.pull_request.head.repo.full_name == github.repository)
     
     steps:
     # No checkout needed for validation - we only echo information and don't access repository files
