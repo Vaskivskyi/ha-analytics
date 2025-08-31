@@ -45,6 +45,10 @@ jobs:
         if [ -f "badge_changes_summary.json" ]; then
           echo "summary=$(cat badge_changes_summary.json | jq -c .)" >> $GITHUB_OUTPUT
           echo "has_changes=true" >> $GITHUB_OUTPUT
+          # Calculate array lengths using jq
+          echo "added_count=$(cat badge_changes_summary.json | jq '.added | length')" >> $GITHUB_OUTPUT
+          echo "modified_count=$(cat badge_changes_summary.json | jq '.modified | length')" >> $GITHUB_OUTPUT
+          echo "removed_count=$(cat badge_changes_summary.json | jq '.removed | length')" >> $GITHUB_OUTPUT
         else
           echo "has_changes=false" >> $GITHUB_OUTPUT
         fi
@@ -67,9 +71,9 @@ jobs:
           
           ### Summary
           - **Total files changed**: ${{ fromJson(steps.changes.outputs.summary).total_changes }}
-          - **Added**: ${{ length(fromJson(steps.changes.outputs.summary).added) }} files
-          - **Modified**: ${{ length(fromJson(steps.changes.outputs.summary).modified) }} files  
-          - **Removed**: ${{ length(fromJson(steps.changes.outputs.summary).removed) }} files
+          - **Added**: ${{ steps.changes.outputs.added_count }} files
+          - **Modified**: ${{ steps.changes.outputs.modified_count }} files  
+          - **Removed**: ${{ steps.changes.outputs.removed_count }} files
           
           <details>
           <summary>📄 Detailed file changes</summary>
@@ -92,16 +96,14 @@ jobs:
       uses: actions/github-script@v7
       with:
         script: |
-          const summary = JSON.parse('${{ steps.changes.outputs.summary }}');
-          
           const commentBody = `## 🤖 Badge Update Triggered
           
           This PR has triggered an automatic badge update. 
           
           **Files affected:**
-          - **Added**: ${summary.added.length} files
-          - **Modified**: ${summary.modified.length} files
-          - **Removed**: ${summary.removed.length} files
+          - **Added**: ${{ steps.changes.outputs.added_count }} files
+          - **Modified**: ${{ steps.changes.outputs.modified_count }} files
+          - **Removed**: ${{ steps.changes.outputs.removed_count }} files
           
           📝 **Badge update PR**: #${{ steps.cpr.outputs.pull-request-number }}
           
