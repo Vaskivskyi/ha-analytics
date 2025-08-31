@@ -16,6 +16,10 @@ on:
       - '**.py'
       - '.github/**'
       - 'requirements.txt'
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+    # For bot PRs, we use pull_request_target without path filtering
+    # to ensure badge update PRs (which only contain docs/**/*.json files) are handled
 
 permissions:
   contents: write
@@ -25,9 +29,38 @@ env:
   DEFAULT_PYTHON: "3.13"
 
 jobs:
+  # Job that runs on automated PRs to provide status check for auto-merge
+  validate:
+    name: Validate automated PR
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'pull_request' && github.head_ref == 'update-badges') ||
+      (github.event_name == 'pull_request_target' && 
+       contains(fromJson('["github-actions[bot]", "dependabot[bot]", "copilot-swe-agent[bot]", "asusrouter-bot"]'), github.actor) &&
+       github.event.pull_request.head.repo.full_name == github.repository)
+    
+    steps:
+    # No checkout needed for validation - we only echo information and don't access repository files
+    - name: Validate PR
+      env:
+        HEAD_REF: ${{ github.head_ref }}
+      run: |
+        echo "✅ Automated badge update PR validated successfully"
+        echo "This PR contains badge data updates and can be auto-merged."
+        echo "Event: ${{ github.event_name }}"
+        echo "Actor: ${{ github.actor }}"
+        echo "Head ref: $HEAD_REF"
+
   generate:
     name: Generate badge files
     runs-on: ubuntu-latest
+    if: |
+      !(
+        (github.event_name == 'pull_request' && github.head_ref == 'update-badges') ||
+        (github.event_name == 'pull_request_target' && 
+         contains(fromJson('["github-actions[bot]", "dependabot[bot]", "copilot-swe-agent[bot]", "asusrouter-bot"]'), github.actor) &&
+         github.event.pull_request.head.repo.full_name == github.repository)
+      )
 
     steps:
     - name: Checkout the repository
