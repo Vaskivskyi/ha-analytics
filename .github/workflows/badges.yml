@@ -48,12 +48,14 @@ jobs:
         ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
     
     - name: Validate PR
+      env:
+        HEAD_REF: ${{ github.head_ref }}
       run: |
         echo "✅ Automated badge update PR validated successfully"
         echo "This PR contains badge data updates and can be auto-merged."
         echo "Event: ${{ github.event_name }}"
         echo "Actor: ${{ github.actor }}"
-        echo "Head ref: ${{ github.head_ref }}"
+        echo "Head ref: $HEAD_REF"
 
   generate:
     name: Generate badge files
