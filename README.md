@@ -6,6 +6,27 @@ The automated data collection in this repository is done each 6 hours.
 
 ## Usage
 
+#### Historical Data
+
+The repository now includes historical time series data for each custom integration showing how installation counts changed over time. This data is automatically generated from the raw daily snapshots and is available at:
+
+```
+https://vaskivskyi.github.io/ha-custom-analytics/history/INTEGRATION_NAME/total.json
+
+https://vaskivskyi.github.io/ha-custom-analytics/history/INTEGRATION_NAME/version-VERSION.json
+```
+
+Each file contains a JSON object with date:count mappings, for example:
+```json
+{
+  "2022-10-26": 1000,
+  "2022-10-27": 1050,
+  "2022-10-28": 1100
+}
+```
+
+This data can be used to plot popularity trends and observe the adoption of different integration versions over time.
+
 #### Shields.io badges
 
 Python script `custom_integration_badges.py` is used to generate JSON files compatible with Shields badges, showing the number of active installations of custom integrations.

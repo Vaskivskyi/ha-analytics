@@ -61,6 +61,11 @@ jobs:
           echo "has_changes=false" >> $GITHUB_OUTPUT
         fi
 
+    - name: Generate history data
+      shell: bash
+      run: |
+        python script/generate_history.py
+
     - name: Create Pull Request
       id: cpr
       if: steps.changes.outputs.has_changes == 'true' && github.event_name != 'pull_request'
