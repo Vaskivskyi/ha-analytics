@@ -23,6 +23,16 @@ RAW_PATH = "docs/raw/custom_integrations/"
 HISTORY_PATH = "docs/history/"
 
 
+def write_git_friendly_json(file_handle, data):
+    """Write JSON in a git-friendly format with each key-value pair on a new line."""
+    file_handle.write("{\n")
+    sorted_items = sorted(data.items())
+    for i, (key, value) in enumerate(sorted_items):
+        comma = "," if i < len(sorted_items) - 1 else ""
+        file_handle.write(f'"{key}": {value}{comma}\n')
+    file_handle.write("}\n")
+
+
 def load_raw_data_files() -> Dict[str, Dict[str, Any]]:
     """Load all raw data files and return sorted by date."""
     raw_data = {}
@@ -90,7 +100,7 @@ def process_integration_history(integration_name: str, date_data: Dict[str, Dict
     if total_history:
         total_file_path = os.path.join(integration_dir, "total.json")
         with open(total_file_path, 'w') as f:
-            json.dump(total_history, f, indent=2, sort_keys=True)
+            write_git_friendly_json(f, total_history)
     
     # Write version history files
     for version, version_history in version_histories.items():
@@ -99,7 +109,7 @@ def process_integration_history(integration_name: str, date_data: Dict[str, Dict
             safe_version = version.replace("/", "_").replace("\\", "_")
             version_file_path = os.path.join(integration_dir, f"version-{safe_version}.json")
             with open(version_file_path, 'w') as f:
-                json.dump(version_history, f, indent=2, sort_keys=True)
+                write_git_friendly_json(f, version_history)
 
 
 def cleanup_old_version_files(integration_dir: str, current_versions: set) -> None:
