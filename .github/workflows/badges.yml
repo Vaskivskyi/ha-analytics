@@ -53,6 +53,10 @@ jobs:
           echo "added_count=$(cat badge_changes_summary.json | jq '.added | length')" >> $GITHUB_OUTPUT
           echo "modified_count=$(cat badge_changes_summary.json | jq '.modified | length')" >> $GITHUB_OUTPUT
           echo "removed_count=$(cat badge_changes_summary.json | jq '.removed | length')" >> $GITHUB_OUTPUT
+          # Get first few files from each category for display (limit to 5 each)
+          echo "added_preview=$(cat badge_changes_summary.json | jq -c '.added[:5]')" >> $GITHUB_OUTPUT
+          echo "modified_preview=$(cat badge_changes_summary.json | jq -c '.modified[:5]')" >> $GITHUB_OUTPUT
+          echo "removed_preview=$(cat badge_changes_summary.json | jq -c '.removed[:5]')" >> $GITHUB_OUTPUT
         else
           echo "has_changes=false" >> $GITHUB_OUTPUT
         fi
@@ -80,12 +84,21 @@ jobs:
           - **Removed**: ${{ steps.changes.outputs.removed_count }} files
           
           <details>
-          <summary>📄 Detailed file changes</summary>
+          <summary>📄 File changes preview (showing first 5 of each type)</summary>
           
-          **Files changed:**
-          ```json
-          ${{ toJson(fromJson(steps.changes.outputs.summary)) }}
-          ```
+          **Added files:**
+          ${{ join(fromJson(steps.changes.outputs.added_preview), '  
+          ') }}
+          
+          **Modified files:**
+          ${{ join(fromJson(steps.changes.outputs.modified_preview), '  
+          ') }}
+          
+          **Removed files:**
+          ${{ join(fromJson(steps.changes.outputs.removed_preview), '  
+          ') }}
+          
+          _Note: Only showing first 5 files per category to avoid overly long descriptions._
           </details>
           
           This PR will be automatically merged if all checks pass.
@@ -110,12 +123,21 @@ jobs:
           - **Removed**: ${{ steps.changes.outputs.removed_count }} files
           
           <details>
-          <summary>📄 Detailed file changes</summary>
+          <summary>📄 File changes preview (showing first 5 of each type)</summary>
           
-          **Files changed:**
-          \`\`\`json
-          ${{ toJson(fromJson(steps.changes.outputs.summary)) }}
-          \`\`\`
+          **Added files:**
+          ${{ join(fromJson(steps.changes.outputs.added_preview), '  
+          ') }}
+          
+          **Modified files:**
+          ${{ join(fromJson(steps.changes.outputs.modified_preview), '  
+          ') }}
+          
+          **Removed files:**
+          ${{ join(fromJson(steps.changes.outputs.removed_preview), '  
+          ') }}
+          
+          _Note: Only showing first 5 files per category to avoid overly long descriptions._
           </details>
           
           ℹ️ **Note**: Badge files are only updated when changes are merged to the main branch.`;
