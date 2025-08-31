@@ -55,9 +55,12 @@ jobs:
     name: Generate badge files
     runs-on: ubuntu-latest
     if: |
-      (github.event_name != 'pull_request' && github.event_name != 'pull_request_target') || 
-      (github.event_name == 'pull_request' && github.head_ref != 'update-badges') ||
-      (github.event_name == 'pull_request_target' && github.head_ref != 'update-badges')
+      !(
+        (github.event_name == 'pull_request' && github.head_ref == 'update-badges') ||
+        (github.event_name == 'pull_request_target' && 
+         github.head_ref == 'update-badges' &&
+         contains(fromJson('["github-actions[bot]", "dependabot[bot]", "copilot-swe-agent[bot]", "asusrouter-bot"]'), github.actor))
+      )
 
     steps:
     - name: Checkout the repository
