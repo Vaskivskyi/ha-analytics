@@ -17,10 +17,9 @@ on:
       - '.github/**'
       - 'requirements.txt'
   pull_request_target:
-    paths:
-      - '**.py'
-      - '.github/**'
-      - 'requirements.txt'
+    types: [opened, synchronize, reopened]
+    # For bot PRs, we use pull_request_target without path filtering
+    # to ensure badge update PRs (which only contain docs/**/*.json files) are handled
 
 permissions:
   contents: write
@@ -36,6 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       (github.event_name == 'pull_request' && github.head_ref == 'update-badges') ||
+      (github.event_name == 'pull_request_target' && 
        contains(fromJson('["github-actions[bot]", "dependabot[bot]", "copilot-swe-agent[bot]", "asusrouter-bot"]'), github.actor) &&
        github.event.pull_request.head.repo.full_name == github.repository)
     
@@ -58,8 +58,8 @@ jobs:
       !(
         (github.event_name == 'pull_request' && github.head_ref == 'update-badges') ||
         (github.event_name == 'pull_request_target' && 
-         github.head_ref == 'update-badges' &&
-         contains(fromJson('["github-actions[bot]", "dependabot[bot]", "copilot-swe-agent[bot]", "asusrouter-bot"]'), github.actor))
+         contains(fromJson('["github-actions[bot]", "dependabot[bot]", "copilot-swe-agent[bot]", "asusrouter-bot"]'), github.actor) &&
+         github.event.pull_request.head.repo.full_name == github.repository)
       )
 
     steps:
