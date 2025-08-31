@@ -56,7 +56,7 @@ def cleanup_old_version_files(integration_path: str, current_versions: list[str]
         # Extract version from filename (version-{version}.json)
         filename = os.path.basename(version_file)
         if filename.startswith("version-") and filename.endswith(".json"):
-            version = filename[8:-5]  # Remove "version-" prefix and ".json" suffix
+            version = filename.removeprefix("version-").removesuffix(".json")  # Remove "version-" prefix and ".json" suffix
             if version not in current_versions:
                 try:
                     os.remove(version_file)
