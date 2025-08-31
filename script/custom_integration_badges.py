@@ -3,6 +3,7 @@ import asyncio
 from datetime import date
 import json
 import os
+import glob
 from typing import Any
 
 DATA_URL = "https://analytics.home-assistant.io/custom_integrations.json"
@@ -43,6 +44,27 @@ def generate_badge(installations: int) -> dict[str, Any]:
     }
 
 
+def cleanup_old_version_files(integration_path: str, current_versions: list[str]):
+    """Remove old version files that are no longer in current data"""
+    if not os.path.exists(integration_path):
+        return
+    
+    # Find all existing version files
+    version_files = glob.glob(os.path.join(integration_path, "version-*.json"))
+    
+    for version_file in version_files:
+        # Extract version from filename (version-{version}.json)
+        filename = os.path.basename(version_file)
+        if filename.startswith("version-") and filename.endswith(".json"):
+            version = filename.removeprefix("version-").removesuffix(".json")  # Remove "version-" prefix and ".json" suffix
+            if version not in current_versions:
+                try:
+                    os.remove(version_file)
+                    print(f"Removed old version file: {version_file}")
+                except OSError as e:
+                    print(f"Error removing {version_file}: {e}")
+
+
 async def async_test():
     data = await async_get_data()
 
@@ -51,6 +73,14 @@ async def async_test():
         # Check the path
         if not os.path.exists(path):
             os.makedirs(path)
+
+        # Get current versions for cleanup
+        current_versions = []
+        if "versions" in data[integration]:
+            current_versions = list(data[integration]["versions"].keys())
+        
+        # Clean up old version files before writing new ones
+        cleanup_old_version_files(path, current_versions)
 
         # Generate total badge
         if "total" in data[integration]:
