@@ -10,6 +10,10 @@ on:
       - '.github/**'
       - 'requirements.txt'
 
+permissions:
+  contents: write
+  pull-requests: write
+
 env:
   DEFAULT_PYTHON: "3.13"
 
@@ -55,7 +59,7 @@ jobs:
 
     - name: Create Pull Request
       id: cpr
-      if: steps.changes.outputs.has_changes == 'true'
+      if: steps.changes.outputs.has_changes == 'true' && github.event_name != 'pull_request'
       uses: peter-evans/create-pull-request@v7
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
@@ -92,22 +96,29 @@ jobs:
           automated
 
     - name: Comment on source PR
-      if: github.event_name == 'pull_request' && steps.cpr.outputs.pull-request-operation == 'created'
+      if: github.event_name == 'pull_request' && steps.changes.outputs.has_changes == 'true'
       uses: actions/github-script@v7
       with:
         script: |
-          const commentBody = `## 🤖 Badge Update Triggered
+          const commentBody = `## 🤖 Badge Update Test Results
           
-          This PR has triggered an automatic badge update. 
+          This PR would trigger badge updates if merged to main.
           
-          **Files affected:**
+          **Files that would be affected:**
           - **Added**: ${{ steps.changes.outputs.added_count }} files
           - **Modified**: ${{ steps.changes.outputs.modified_count }} files
           - **Removed**: ${{ steps.changes.outputs.removed_count }} files
           
-          📝 **Badge update PR**: #${{ steps.cpr.outputs.pull-request-number }}
+          <details>
+          <summary>📄 Detailed file changes</summary>
           
-          The badge files will be updated automatically and merged if all checks pass.`;
+          **Files changed:**
+          \`\`\`json
+          ${{ toJson(fromJson(steps.changes.outputs.summary)) }}
+          \`\`\`
+          </details>
+          
+          ℹ️ **Note**: Badge files are only updated when changes are merged to the main branch.`;
           
           github.rest.issues.createComment({
             issue_number: context.issue.number,
@@ -117,10 +128,10 @@ jobs:
           });
 
     - run: sleep 5
-      if: steps.cpr.outputs.pull-request-operation == 'created'
+      if: steps.cpr.outputs.pull-request-operation == 'created' && github.event_name != 'pull_request'
 
     - name: Enable Pull Request Automerge
-      if: steps.cpr.outputs.pull-request-operation == 'created'
+      if: steps.cpr.outputs.pull-request-operation == 'created' && github.event_name != 'pull_request'
       uses: peter-evans/enable-pull-request-automerge@v3
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
@@ -128,7 +139,7 @@ jobs:
         merge-method: squash
 
     - name: Add PR status comment
-      if: steps.cpr.outputs.pull-request-operation == 'created'
+      if: steps.cpr.outputs.pull-request-operation == 'created' && github.event_name != 'pull_request'
       uses: actions/github-script@v7
       with:
         script: |
