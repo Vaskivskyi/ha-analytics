@@ -67,21 +67,17 @@ jobs:
           
           ### Summary
           - **Total files changed**: ${{ fromJson(steps.changes.outputs.summary).total_changes }}
-          - **Added**: ${{ fromJson(steps.changes.outputs.summary).added | length }} files
-          - **Modified**: ${{ fromJson(steps.changes.outputs.summary).modified | length }} files  
-          - **Removed**: ${{ fromJson(steps.changes.outputs.summary).removed | length }} files
+          - **Added**: ${{ length(fromJson(steps.changes.outputs.summary).added) }} files
+          - **Modified**: ${{ length(fromJson(steps.changes.outputs.summary).modified) }} files  
+          - **Removed**: ${{ length(fromJson(steps.changes.outputs.summary).removed) }} files
           
           <details>
           <summary>📄 Detailed file changes</summary>
           
-          **Added files:**
-          ${{ fromJson(steps.changes.outputs.summary).added | join('\n- ') }}
-          
-          **Modified files:**
-          ${{ fromJson(steps.changes.outputs.summary).modified | join('\n- ') }}
-          
-          **Removed files:**  
-          ${{ fromJson(steps.changes.outputs.summary).removed | join('\n- ') }}
+          **Files changed:**
+          ```json
+          ${{ toJson(fromJson(steps.changes.outputs.summary)) }}
+          ```
           </details>
           
           This PR will be automatically merged if all checks pass.
