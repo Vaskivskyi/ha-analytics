@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  DEFAULT_PYTHON: "3.10"
+  DEFAULT_PYTHON: "3.12"
 
 jobs:
   generate:
@@ -15,17 +15,17 @@ jobs:
 
     steps:
     - name: Checkout the repository
-      uses: actions/checkout@v5.0.0
+      uses: actions/checkout@v4
 
     - name: Setup Python ${{ env.DEFAULT_PYTHON }}
-      uses: actions/setup-python@v5.6.0
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ env.DEFAULT_PYTHON }}
 
     - name: Install Python dependencies
-      uses: py-actions/py-dependency-install@v4
-      with:
-        path: "requirements.txt"
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
     - name: Get and save data
       shell: bash
