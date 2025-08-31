@@ -6,3 +6,9 @@ updates:
       interval: "daily"
     assignees:
       - "Vaskivskyi"
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "Vaskivskyi"
