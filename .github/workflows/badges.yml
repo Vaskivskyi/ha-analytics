@@ -17,7 +17,6 @@ jobs:
   generate:
     name: Generate badge files
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
 
     steps:
     - name: Checkout the repository
@@ -38,7 +37,7 @@ jobs:
     - name: Get and save data
       shell: bash
       run: |
-        python script/custom_integration_badges.py
+        uv run python script/custom_integration_badges.py
 
     - name: Read changes summary
       id: changes
