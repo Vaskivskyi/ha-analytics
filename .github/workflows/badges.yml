@@ -41,12 +41,7 @@ jobs:
        contains(fromJson('["github-actions[bot]", "dependabot[bot]", "copilot-swe-agent[bot]", "asusrouter-bot"]'), github.actor))
     
     steps:
-    - name: Checkout the repository
-      uses: actions/checkout@v5.0.0
-      with:
-        # For pull_request_target, we need to checkout the PR head
-        ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
-    
+    # No checkout needed for validation - we only echo information and don't access repository files
     - name: Validate PR
       env:
         HEAD_REF: ${{ github.head_ref }}
