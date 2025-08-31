@@ -10,6 +10,13 @@ DATA_URL = "https://analytics.home-assistant.io/custom_integrations.json"
 PROCESSED_PATH = "docs/badges/"
 RAW_PATH = "docs/raw/custom_integrations/"
 
+# Track file changes for reporting
+file_changes = {
+    "added": [],
+    "modified": [],
+    "removed": []
+}
+
 
 async def async_get_data(session: aiohttp.ClientSession | None = None):
     """Load data"""
@@ -28,8 +35,34 @@ async def async_get_data(session: aiohttp.ClientSession | None = None):
         os.makedirs(RAW_PATH)
     today = date.today()
     path = RAW_PATH + today.isoformat() + ".json"
-    with open(path, "w") as file:
-        json.dump(json_body, file)
+    
+    # Check if this is a new file and if content changed
+    is_new_file = not os.path.exists(path)
+    content_changed = True
+    
+    if not is_new_file:
+        # Read existing content and compare
+        try:
+            with open(path, "r") as file:
+                existing_data = json.load(file)
+                content_changed = existing_data != json_body
+        except (json.JSONDecodeError, IOError):
+            # If we can't read the existing file, assume content changed
+            content_changed = True
+    
+    # Only write and track if content changed or file is new
+    if is_new_file or content_changed:
+        with open(path, "w") as file:
+            json.dump(json_body, file)
+        
+        if is_new_file:
+            file_changes["added"].append(path)
+            print(f"Added new raw data file: {path}")
+        else:
+            file_changes["modified"].append(path)
+            print(f"Updated raw data file: {path}")
+    else:
+        print(f"No changes needed for raw data file: {path}")
 
     return json_body
 
@@ -60,9 +93,40 @@ def cleanup_old_version_files(integration_path: str, current_versions: list[str]
             if version not in current_versions:
                 try:
                     os.remove(version_file)
+                    file_changes["removed"].append(version_file)
                     print(f"Removed old version file: {version_file}")
                 except OSError as e:
                     print(f"Error removing {version_file}: {e}")
+
+
+def write_badge_file(file_path: str, badge_data: dict[str, Any]):
+    """Write badge file and track changes only if content actually changed"""
+    is_new_file = not os.path.exists(file_path)
+    content_changed = True
+    
+    if not is_new_file:
+        # Read existing content and compare
+        try:
+            with open(file_path, "r") as file:
+                existing_data = json.load(file)
+                content_changed = existing_data != badge_data
+        except (json.JSONDecodeError, IOError):
+            # If we can't read the existing file, assume content changed
+            content_changed = True
+    
+    # Only write if content changed or file is new
+    if is_new_file or content_changed:
+        with open(file_path, "w") as file:
+            json.dump(badge_data, file)
+        
+        if is_new_file:
+            file_changes["added"].append(file_path)
+            print(f"Created new badge file: {file_path}")
+        else:
+            file_changes["modified"].append(file_path)
+            print(f"Updated badge file: {file_path}")
+    else:
+        print(f"No changes needed for: {file_path}")
 
 
 async def async_test():
@@ -85,16 +149,56 @@ async def async_test():
         # Generate total badge
         if "total" in data[integration]:
             badge = generate_badge(data[integration]["total"])
-            with open(f"{path}/total.json", "w") as file:
-                json.dump(badge, file)
+            write_badge_file(f"{path}/total.json", badge)
         # Generate per-version badges
         if "versions" in data[integration]:
             for version in data[integration]["versions"]:
                 badge = generate_badge(data[integration]["versions"][version])
-                with open(f"{path}/version-{version}.json", "w") as file:
-                    json.dump(badge, file)
+                write_badge_file(f"{path}/version-{version}.json", badge)
+
+
+def print_summary():
+    """Print summary of file changes"""
+    print("\n=== BADGE GENERATION SUMMARY ===")
+    
+    total_changes = len(file_changes["added"]) + len(file_changes["modified"]) + len(file_changes["removed"])
+    print(f"Total files changed: {total_changes}")
+    
+    if file_changes["added"]:
+        print(f"\nAdded files ({len(file_changes['added'])}):")
+        for file_path in file_changes["added"]:
+            print(f"  + {file_path}")
+    
+    if file_changes["modified"]:
+        print(f"\nModified files ({len(file_changes['modified'])}):")
+        for file_path in file_changes["modified"]:
+            print(f"  ~ {file_path}")
+    
+    if file_changes["removed"]:
+        print(f"\nRemoved files ({len(file_changes['removed'])}):")
+        for file_path in file_changes["removed"]:
+            print(f"  - {file_path}")
+    
+    if total_changes == 0:
+        print("No files were changed.")
+    
+    print("================================\n")
+    
+    # Write summary to file for GitHub Action to read
+    summary_data = {
+        "total_changes": total_changes,
+        "added": file_changes["added"],
+        "modified": file_changes["modified"], 
+        "removed": file_changes["removed"]
+    }
+    
+    with open("badge_changes_summary.json", "w") as f:
+        json.dump(summary_data, f, indent=2)
+    
+    print("Summary saved to badge_changes_summary.json")
 
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(async_test())
+print_summary()
 loop.close()
