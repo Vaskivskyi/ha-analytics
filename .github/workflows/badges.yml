@@ -142,12 +142,35 @@ jobs:
           
           ℹ️ **Note**: Badge files are only updated when changes are merged to the main branch.`;
           
-          github.rest.issues.createComment({
+          // Check for existing comment from asusrouter-bot
+          const comments = await github.rest.issues.listComments({
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: commentBody
           });
+          
+          const botComment = comments.data.find(comment => 
+            comment.user.login === 'github-actions[bot]' && 
+            comment.body.includes('🤖 Badge Update Test Results')
+          );
+          
+          if (botComment) {
+            // Update existing comment
+            await github.rest.issues.updateComment({
+              comment_id: botComment.id,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            });
+          } else {
+            // Create new comment
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            });
+          }
 
     - run: sleep 5
       if: steps.cpr.outputs.pull-request-operation == 'created' && github.event_name != 'pull_request'
