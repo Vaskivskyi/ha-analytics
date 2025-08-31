@@ -4,14 +4,19 @@ on:
   schedule:
     - cron: '0 */6 * * *'
   workflow_dispatch:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
 
 env:
-  DEFAULT_PYTHON: "3.12"
+  DEFAULT_PYTHON: "3.13"
 
 jobs:
   generate:
     name: Generate badge files
     runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
 
     steps:
     - name: Checkout the repository
@@ -24,8 +29,8 @@ jobs:
 
     - name: Install Python dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        python -m pip install uv
+        uv pip install -r requirements.txt
 
     - name: Get and save data
       shell: bash
