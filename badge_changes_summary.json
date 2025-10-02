@@ -1,6 +1,8 @@
 {
-  "total_changes": 0,
-  "added": [],
+  "total_changes": 1,
+  "added": [
+    "docs/raw/custom_integrations/2025-10-02.json"
+  ],
   "modified": [],
   "removed": []
 }
