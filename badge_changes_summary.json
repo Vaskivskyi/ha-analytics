@@ -1,39 +1,6 @@
 {
-  "total_changes": 31,
-  "added": [
-    "docs/badges/tesla_custom/version-3.26.2.json",
-    "docs/badges/kia_uvo/version-3.3.2.json",
-    "docs/badges/powercalc/version-v1.21.0.json",
-    "docs/badges/xiaomi_miio_fan/version-2026.6.0.2.json",
-    "docs/badges/mypv/version-1.3.2.json"
-  ],
-  "modified": [
-    "docs/raw/custom_integrations/2026-06-15.json",
-    "docs/badges/tesla_custom/total.json",
-    "docs/badges/hubspace/version-5.10.0.json",
-    "docs/badges/hubspace/version-6.0.1.json",
-    "docs/badges/browser_mod/total.json",
-    "docs/badges/browser_mod/version-2.10.2.json",
-    "docs/badges/evcc_intg/version-2026.5.12.json",
-    "docs/badges/evcc_intg/version-2026.6.0.json",
-    "docs/badges/kia_uvo/version-3.3.1.json",
-    "docs/badges/better_thermostat/total.json",
-    "docs/badges/better_thermostat/version-1.8.2.json",
-    "docs/badges/scheduler/total.json",
-    "docs/badges/scheduler/version-v0.0.0.json",
-    "docs/badges/powercalc/version-v1.20.14.json",
-    "docs/badges/iphonedetect/total.json",
-    "docs/badges/iphonedetect/version-2.4.1.json",
-    "docs/badges/afvalbeheer/total.json",
-    "docs/badges/afvalbeheer/version-6.5.11.json",
-    "docs/badges/network_scanner/total.json",
-    "docs/badges/network_scanner/version-1.0.7.json",
-    "docs/badges/openevse/version-3.1.0.json",
-    "docs/badges/openevse/version-3.0.4.json",
-    "docs/badges/xiaomi_miio_fan/total.json",
-    "docs/badges/mypv/version-1.3.1.json",
-    "docs/badges/pysmaplus/total.json",
-    "docs/badges/pysmaplus/version-0.5.2.json"
-  ],
+  "total_changes": 0,
+  "added": [],
+  "modified": [],
   "removed": []
 }
